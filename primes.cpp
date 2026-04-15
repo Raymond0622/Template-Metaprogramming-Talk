@@ -3,7 +3,7 @@
 #include <utility>
 #include <cmath>
 
-constexpr int N = 25;
+constexpr int N = 1000;
 constexpr int n = std::sqrt(N);
 
 template <typename T, typename U, typename S>
@@ -105,16 +105,26 @@ struct sieve_eratosthenes<std::integer_sequence<T, C, Cs...>, std::integer_seque
                     typename check_divisibility<indexes, numbers, divisor>::value, std::integer_sequence<T>>;
 
     using primes = std::conditional_t<check_divisor_small_n::value, 
-             typename combine_my_list<std::conditional_t<divisor::value >= 2, std::integer_sequence<T, divisor::value>, 
+        typename combine_my_list<std::conditional_t<divisor::value >= 2, std::integer_sequence<T, divisor::value>, 
                 std::integer_sequence<T>>, typename sieve_eratosthenes<obj, numbers>::primes>::value, 
-                    combine_my_list<std::index_sequence<T, divisor::value>, typename construct_rest<indexes, numbers>::value>::value>;
+                    typename combine_my_list<std::integer_sequence<T, divisor::value>, typename construct_rest<indexes, numbers>::value>::value>;
 
 };
 
+// template <typename T, size_t... P, std::integer_sequence<T, P...>>
+// void print_primes() {
+//     ((std::cout << P << std::endl), ...);
+// }
+
+template <typename T>
+struct printer;
+
 template <typename T, size_t... P>
-void print_primes(std::integer_sequence<T, P...>) {
-    ((std::cout << P << std::endl), ...);
-}
+struct printer<std::integer_sequence<T, P...>> {
+    static void print() {
+        ((std::cout << P << "\n"), ...);
+    }
+};
 
 int main(int argc, char** argv) {
     static_assert(N > 1);
@@ -124,6 +134,6 @@ int main(int argc, char** argv) {
     using K2 = typename truncate<K1>::value;
     using T = typename divisible_array<K2>::value;
     using P = typename sieve_eratosthenes<T, K2>::primes;
-    print_primes(P{});
+    printer<P>::print();
 
 }
