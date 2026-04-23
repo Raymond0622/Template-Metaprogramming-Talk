@@ -3,7 +3,7 @@
 #include <utility>
 #include <cmath>
 
-constexpr int N = 1000;
+constexpr int N = 200;
 constexpr int n = std::sqrt(N);
 
 template <typename T, typename U, typename S>
@@ -60,16 +60,6 @@ struct combine_my_list<std::integer_sequence<T, Is...>, std::integer_sequence<T,
     using value = std::integer_sequence<T, Is..., Js...>;
 };
 
-template <typename T, typename U>
-struct sieve_eratosthenes {
-    using primes = std::integer_sequence<T>;
-};
-
-template <typename T>
-struct sieve_eratosthenes<std::integer_sequence<T>, std::integer_sequence<T>> {
-    using primes = std::integer_sequence<T>;
-};
-
 template <typename T, typename U, typename S = void>
 struct check_rootn : std::false_type {};
 
@@ -92,6 +82,17 @@ struct construct_rest<std::integer_sequence<T, I, Is...>, std::integer_sequence<
             typename construct_rest<std::integer_sequence<T, Is...>, std::integer_sequence<T, Js...>>::value>::value;
 };
 
+template <typename T, typename U>
+struct sieve_eratosthenes {
+    using primes = std::integer_sequence<T>;
+};
+
+template <typename T>
+struct sieve_eratosthenes<std::integer_sequence<T>, std::integer_sequence<T>> {
+    using primes = std::integer_sequence<T>;
+};
+
+
 template <typename T, size_t C, size_t... Cs, T I, T... Is>
 struct sieve_eratosthenes<std::integer_sequence<T, C, Cs...>, std::integer_sequence<T, I, Is...>> {
     using res = typename find_first_one<std::integer_sequence<T, C, Cs...>, 
@@ -105,11 +106,15 @@ struct sieve_eratosthenes<std::integer_sequence<T, C, Cs...>, std::integer_seque
                     typename check_divisibility<indexes, numbers, divisor>::value, std::integer_sequence<T>>;
 
     using primes = std::conditional_t<check_divisor_small_n::value, 
-        typename combine_my_list<std::conditional_t<divisor::value >= 2, std::integer_sequence<T, divisor::value>, 
-                std::integer_sequence<T>>, typename sieve_eratosthenes<obj, numbers>::primes>::value, 
-                    typename combine_my_list<std::integer_sequence<T, divisor::value>, typename construct_rest<indexes, numbers>::value>::value>;
+        typename combine_my_list<std::conditional_t<divisor::value >= 2, 
+        std::integer_sequence<T, divisor::value>, 
+                std::integer_sequence<T>>, 
+                typename sieve_eratosthenes<obj, numbers>::primes>::value, 
+                    typename combine_my_list<std::integer_sequence<T, divisor::value>, 
+            typename construct_rest<indexes, numbers>::value>::value>;
 
 };
+
 
 // template <typename T, size_t... P, std::integer_sequence<T, P...>>
 // void print_primes() {
